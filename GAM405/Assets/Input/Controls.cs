@@ -179,6 +179,34 @@ public partial class @Controls: IInputActionCollection2, IDisposable
                     ""isPartOfComposite"": false
                 }
             ]
+        },
+        {
+            ""name"": ""Start Menu"",
+            ""id"": ""c897aa57-2c27-4e73-b699-dec0137e0ce5"",
+            ""actions"": [
+                {
+                    ""name"": ""Game Start"",
+                    ""type"": ""Button"",
+                    ""id"": ""7540aa82-74f9-4070-86fe-322a38d10226"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                }
+            ],
+            ""bindings"": [
+                {
+                    ""name"": """",
+                    ""id"": ""5ecbafdc-b3a0-48a2-adfa-2afe46ba6e98"",
+                    ""path"": ""<Keyboard>/anyKey"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Game Start"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                }
+            ]
         }
     ],
     ""controlSchemes"": []
@@ -187,11 +215,15 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         m_Gameplay = asset.FindActionMap("Gameplay", throwIfNotFound: true);
         m_Gameplay_Move = m_Gameplay.FindAction("Move", throwIfNotFound: true);
         m_Gameplay_Jump = m_Gameplay.FindAction("Jump", throwIfNotFound: true);
+        // Start Menu
+        m_StartMenu = asset.FindActionMap("Start Menu", throwIfNotFound: true);
+        m_StartMenu_GameStart = m_StartMenu.FindAction("Game Start", throwIfNotFound: true);
     }
 
     ~@Controls()
     {
         UnityEngine.Debug.Assert(!m_Gameplay.enabled, "This will cause a leak and performance issues, Controls.Gameplay.Disable() has not been called.");
+        UnityEngine.Debug.Assert(!m_StartMenu.enabled, "This will cause a leak and performance issues, Controls.StartMenu.Disable() has not been called.");
     }
 
     /// <summary>
@@ -370,6 +402,102 @@ public partial class @Controls: IInputActionCollection2, IDisposable
     /// Provides a new <see cref="GameplayActions" /> instance referencing this action map.
     /// </summary>
     public GameplayActions @Gameplay => new GameplayActions(this);
+
+    // Start Menu
+    private readonly InputActionMap m_StartMenu;
+    private List<IStartMenuActions> m_StartMenuActionsCallbackInterfaces = new List<IStartMenuActions>();
+    private readonly InputAction m_StartMenu_GameStart;
+    /// <summary>
+    /// Provides access to input actions defined in input action map "Start Menu".
+    /// </summary>
+    public struct StartMenuActions
+    {
+        private @Controls m_Wrapper;
+
+        /// <summary>
+        /// Construct a new instance of the input action map wrapper class.
+        /// </summary>
+        public StartMenuActions(@Controls wrapper) { m_Wrapper = wrapper; }
+        /// <summary>
+        /// Provides access to the underlying input action "StartMenu/GameStart".
+        /// </summary>
+        public InputAction @GameStart => m_Wrapper.m_StartMenu_GameStart;
+        /// <summary>
+        /// Provides access to the underlying input action map instance.
+        /// </summary>
+        public InputActionMap Get() { return m_Wrapper.m_StartMenu; }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Enable()" />
+        public void Enable() { Get().Enable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.Disable()" />
+        public void Disable() { Get().Disable(); }
+        /// <inheritdoc cref="UnityEngine.InputSystem.InputActionMap.enabled" />
+        public bool enabled => Get().enabled;
+        /// <summary>
+        /// Implicitly converts an <see ref="StartMenuActions" /> to an <see ref="InputActionMap" /> instance.
+        /// </summary>
+        public static implicit operator InputActionMap(StartMenuActions set) { return set.Get(); }
+        /// <summary>
+        /// Adds <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <param name="instance">Callback instance.</param>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c> or <paramref name="instance"/> have already been added this method does nothing.
+        /// </remarks>
+        /// <seealso cref="StartMenuActions" />
+        public void AddCallbacks(IStartMenuActions instance)
+        {
+            if (instance == null || m_Wrapper.m_StartMenuActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_StartMenuActionsCallbackInterfaces.Add(instance);
+            @GameStart.started += instance.OnGameStart;
+            @GameStart.performed += instance.OnGameStart;
+            @GameStart.canceled += instance.OnGameStart;
+        }
+
+        /// <summary>
+        /// Removes <see cref="InputAction.started"/>, <see cref="InputAction.performed"/> and <see cref="InputAction.canceled"/> callbacks provided via <param cref="instance" /> on all input actions contained in this map.
+        /// </summary>
+        /// <remarks>
+        /// Calling this method when <paramref name="instance" /> have not previously been registered has no side-effects.
+        /// </remarks>
+        /// <seealso cref="StartMenuActions" />
+        private void UnregisterCallbacks(IStartMenuActions instance)
+        {
+            @GameStart.started -= instance.OnGameStart;
+            @GameStart.performed -= instance.OnGameStart;
+            @GameStart.canceled -= instance.OnGameStart;
+        }
+
+        /// <summary>
+        /// Unregisters <param cref="instance" /> and unregisters all input action callbacks via <see cref="StartMenuActions.UnregisterCallbacks(IStartMenuActions)" />.
+        /// </summary>
+        /// <seealso cref="StartMenuActions.UnregisterCallbacks(IStartMenuActions)" />
+        public void RemoveCallbacks(IStartMenuActions instance)
+        {
+            if (m_Wrapper.m_StartMenuActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        /// <summary>
+        /// Replaces all existing callback instances and previously registered input action callbacks associated with them with callbacks provided via <param cref="instance" />.
+        /// </summary>
+        /// <remarks>
+        /// If <paramref name="instance" /> is <c>null</c>, calling this method will only unregister all existing callbacks but not register any new callbacks.
+        /// </remarks>
+        /// <seealso cref="StartMenuActions.AddCallbacks(IStartMenuActions)" />
+        /// <seealso cref="StartMenuActions.RemoveCallbacks(IStartMenuActions)" />
+        /// <seealso cref="StartMenuActions.UnregisterCallbacks(IStartMenuActions)" />
+        public void SetCallbacks(IStartMenuActions instance)
+        {
+            foreach (var item in m_Wrapper.m_StartMenuActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_StartMenuActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    /// <summary>
+    /// Provides a new <see cref="StartMenuActions" /> instance referencing this action map.
+    /// </summary>
+    public StartMenuActions @StartMenu => new StartMenuActions(this);
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Gameplay" which allows adding and removing callbacks.
     /// </summary>
@@ -391,5 +519,20 @@ public partial class @Controls: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnJump(InputAction.CallbackContext context);
+    }
+    /// <summary>
+    /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "Start Menu" which allows adding and removing callbacks.
+    /// </summary>
+    /// <seealso cref="StartMenuActions.AddCallbacks(IStartMenuActions)" />
+    /// <seealso cref="StartMenuActions.RemoveCallbacks(IStartMenuActions)" />
+    public interface IStartMenuActions
+    {
+        /// <summary>
+        /// Method invoked when associated input action "Game Start" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnGameStart(InputAction.CallbackContext context);
     }
 }

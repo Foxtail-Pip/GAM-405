@@ -93,6 +93,34 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "Start Menu",
+            "id": "c897aa57-2c27-4e73-b699-dec0137e0ce5",
+            "actions": [
+                {
+                    "name": "Game Start",
+                    "type": "Button",
+                    "id": "7540aa82-74f9-4070-86fe-322a38d10226",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "5ecbafdc-b3a0-48a2-adfa-2afe46ba6e98",
+                    "path": "<Keyboard>/anyKey",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Game Start",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": []
