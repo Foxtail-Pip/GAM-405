@@ -1,3 +1,4 @@
+using System;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -7,6 +8,8 @@ public class PlayerController : MonoBehaviour
 {
     public InputActionReference moveAction;
     public InputActionReference jumpAction;
+    public InputActionReference abilityAction;
+    public InputActionReference characterSwap;
     public float moveSpeed = 5f;
     public float jumpForce = 500f;
     public Rigidbody2D rb;
@@ -14,14 +17,18 @@ public class PlayerController : MonoBehaviour
     [SerializeField] bool isGrounded = true;
     [SerializeField] private bool activeAbility = false;
     [SerializeField] float groundCheckDistance = 5f;
+    private SpriteRenderer characterColor;
 
-
-    enum CurrentState { DefaultMovement, AntigravActive, AttackActive, ShrinkActive, Jumping }
+    enum CurrentState { DefaultMovement, AntigravActive, ShrinkActive, Jumping }
     [SerializeField] CurrentState state = CurrentState.DefaultMovement;
 
     enum CurrentCharacter { CharacterA, CharacterB, CharacterC };
     [SerializeField] CurrentCharacter character = CurrentCharacter.CharacterA;
 
+    private void Start()
+    {
+        characterColor = this.GetComponent <SpriteRenderer> ();
+    }
     // Update is called once per frame
     void Update()
     {
@@ -51,6 +58,12 @@ public class PlayerController : MonoBehaviour
             jumpAction.action.canceled += OnJumpReleased;
             jumpAction.action.Enable();
         }
+        if (characterSwap != null)
+        { 
+            characterSwap.action.performed += OnSwapPressed;
+            characterSwap.action.canceled += OnSwapReleased;
+            characterSwap.action.Enable();
+        }
     }
     private void OnDisable()
     {
@@ -61,6 +74,43 @@ public class PlayerController : MonoBehaviour
             jumpAction.action.performed += OnJumpPressed;
             jumpAction.action.canceled += OnJumpReleased;
             jumpAction.action.Disable();
+        }
+        if (characterSwap != null)
+        {
+            characterSwap.action.performed += OnSwapPressed;
+            characterSwap.action.canceled += OnSwapReleased;
+            characterSwap.action.Disable();
+        }
+    }
+
+    private void OnSwapPressed(InputAction.CallbackContext callbackContext)
+    {
+        Cycle();
+        Debug.Log("Swapped");
+       
+    }
+
+    private void OnSwapReleased(InputAction.CallbackContext callbackContext)
+    {
+      
+    }
+
+    public void Cycle()
+    {
+        if (character == CurrentCharacter.CharacterA)  //&& character != CurrentCharacter.CharacterA
+        {
+            character = CurrentCharacter.CharacterB;
+            Debug.Log("B");
+        }
+        else if (character == CurrentCharacter.CharacterB)
+        {
+            character = CurrentCharacter.CharacterC;
+            Debug.Log("C");
+        }
+        else if (character == CurrentCharacter.CharacterC)
+        {
+            character = CurrentCharacter.CharacterA;
+            Debug.Log("A");
         }
     }
 
@@ -74,7 +124,7 @@ public class PlayerController : MonoBehaviour
 
     void OnJumpReleased(InputAction.CallbackContext callbackContext)
     {
-        Debug.Log("Space Released");
+           Debug.Log("Space Released");
     }
 
     private void FixedUpdate()
@@ -103,8 +153,6 @@ public class PlayerController : MonoBehaviour
 
     public void Jump()
     {
-
-
         // if (Input.GetKeyDown(KeyCode.Space)) 
         // if (rb == null) return;
         //  if (!isGrounded) return;
@@ -114,6 +162,13 @@ public class PlayerController : MonoBehaviour
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         isGrounded = false;
         state = CurrentState.Jumping;
+        character = CurrentCharacter.CharacterB;
+        
+    }
+
+    public void UseAbility()
+    {
+
     }
 
     private void HandleState() //Keeping track of the kinds of powers you can use... like if you're jumping you cannot be jumping again until you're grounded
@@ -126,9 +181,6 @@ public class PlayerController : MonoBehaviour
                 activeAbility = false;
                 break;
             case CurrentState.AntigravActive:
-                activeAbility = true;
-                break;
-            case CurrentState.AttackActive:
                 activeAbility = true;
                 break;
             case CurrentState.ShrinkActive:
@@ -144,11 +196,14 @@ public class PlayerController : MonoBehaviour
     {
         switch (character)
         {
-            case CurrentCharacter.CharacterA:
+            case CurrentCharacter.CharacterA: //default and jump
+                characterColor.color = Color.red;
                 break;
-            case CurrentCharacter.CharacterB:
+            case CurrentCharacter.CharacterB: //shrink
+                characterColor.color = Color.green;
                 break;
-            case CurrentCharacter.CharacterC:
+            case CurrentCharacter.CharacterC: //antigrav
+                characterColor.color = Color.blue;
                 break;
         }
     }
