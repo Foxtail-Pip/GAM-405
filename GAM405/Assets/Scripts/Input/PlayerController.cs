@@ -10,17 +10,19 @@ public class PlayerController : MonoBehaviour
     public InputActionReference jumpAction;
     public InputActionReference abilityAction;
     public InputActionReference characterSwap;
+
     public float moveSpeed = 5f;
     public float jumpForce = 500f;
     public Rigidbody2D rb;
     private Vector2 moveInput;
+
     [SerializeField] bool isGrounded = true;
     [SerializeField] private bool activeAbility = false;
     [SerializeField] float groundCheckDistance = 5f;
     private SpriteRenderer characterColor;
 
-    enum CurrentState { DefaultMovement, AntigravActive, ShrinkActive, Jumping }
-    [SerializeField] CurrentState state = CurrentState.DefaultMovement;
+    enum CurrentState { NoAbility, AntigravActive, ShrinkActive, Jumping }
+    [SerializeField] CurrentState state = CurrentState.NoAbility;
 
     enum CurrentCharacter { CharacterA, CharacterB, CharacterC };
     [SerializeField] CurrentCharacter character = CurrentCharacter.CharacterA;
@@ -64,6 +66,11 @@ public class PlayerController : MonoBehaviour
             characterSwap.action.canceled += OnSwapReleased;
             characterSwap.action.Enable();
         }
+        if (abilityAction != null)
+        {
+            abilityAction.action.performed += UseAbility;
+            abilityAction.action.Enable();
+        }
     }
     private void OnDisable()
     {
@@ -80,6 +87,11 @@ public class PlayerController : MonoBehaviour
             characterSwap.action.performed += OnSwapPressed;
             characterSwap.action.canceled += OnSwapReleased;
             characterSwap.action.Disable();
+        }
+        if (abilityAction != null)
+        {
+            abilityAction.action.performed += UseAbility;
+            abilityAction.action.Disable();
         }
     }
 
@@ -133,6 +145,7 @@ public class PlayerController : MonoBehaviour
         Vector2 step = new Vector2(stepx, 0);
        // rb.MovePosition(rb.position + step); //This is left/right movement but deactivates the jump on first frame
         rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+
         RaycastHit2D raycastHit;
         raycastHit = Physics2D.Raycast(transform.position + (Vector3.down * 0.51f), Vector2.down, groundCheckDistance);
         Debug.DrawRay(transform.position, Vector2.down, Color.red, groundCheckDistance); //This makes the laser appear
@@ -140,12 +153,13 @@ public class PlayerController : MonoBehaviour
         {
             Debug.Log(raycastHit.collider.gameObject);
             isGrounded = true;
+           // state = CurrentState.DefaultMovement; //< This makes it so you can't activate your ability
         }
         else
         {
             isGrounded = false;
+            state = CurrentState.Jumping; //< if the above comment is deactivated then you stay in jump
         } 
-
        
     }
 
@@ -158,14 +172,29 @@ public class PlayerController : MonoBehaviour
 
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         isGrounded = false;
-        state = CurrentState.Jumping;
+      //  state = CurrentState.Jumping;
     }
 
-    public void UseAbility()
+    public void UseAbility(InputAction.CallbackContext callbackContext)
     {
-        if (character == CurrentCharacter.CharacterA && activeAbility == false) //REMEMBER THE DOUBLE EQUALS
+        // add grounded check here? So if you click ability you stay in it?? EG. && isGrounded == true
+        
+       // if (character == CurrentCharacter.CharacterA && isGrounded == true) { state = CurrentState.DefaultMovement; }
+        if (character == CurrentCharacter.CharacterB && activeAbility == false) //REMEMBER THE DOUBLE EQUALS
         {
-
+            state = CurrentState.ShrinkActive;
+        }
+        else if (character == CurrentCharacter.CharacterB && activeAbility == true)
+        {
+            state = CurrentState.NoAbility;
+        }
+        else if (character == CurrentCharacter.CharacterC && activeAbility == false)
+        {
+            state = CurrentState.AntigravActive;
+        }
+        else if (character == CurrentCharacter.CharacterC && activeAbility == true)
+        {
+            state = CurrentState.NoAbility;
         }
     }
 
@@ -175,7 +204,7 @@ public class PlayerController : MonoBehaviour
     {
         switch (state)
         {
-            case CurrentState.DefaultMovement:
+            case CurrentState.NoAbility:
                 activeAbility = false;
                 break;
             case CurrentState.AntigravActive:
@@ -184,9 +213,9 @@ public class PlayerController : MonoBehaviour
             case CurrentState.ShrinkActive:
                 activeAbility = true;
                 break;
-            case CurrentState.Jumping:
-                activeAbility = false;
-                break;
+           // case CurrentState.Jumping:
+                
+                //break;
         }
     }
 
@@ -195,13 +224,17 @@ public class PlayerController : MonoBehaviour
         switch (character)
         {
             case CurrentCharacter.CharacterA: //default and jump
-                characterColor.color = Color.red;
+                characterColor.color = Color.indianRed;
+                if (isGrounded)
+                {
+                    state = CurrentState.NoAbility;
+                }
                 break;
             case CurrentCharacter.CharacterB: //shrink
-                characterColor.color = Color.green;
+                characterColor.color = Color.darkOrchid;
                 break;
             case CurrentCharacter.CharacterC: //antigrav
-                characterColor.color = Color.blue;
+                characterColor.color = Color.royalBlue;
                 break;
         }
     }
