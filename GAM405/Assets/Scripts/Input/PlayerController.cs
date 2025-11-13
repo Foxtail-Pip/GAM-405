@@ -54,8 +54,8 @@ public class PlayerController : MonoBehaviour
 
         if (jumpAction != null)
         {
-            jumpAction.action.performed += OnJumpPressed;
-            jumpAction.action.canceled += OnJumpReleased;
+            jumpAction.action.performed += Jump;
+           // jumpAction.action.canceled += OnJumpReleased;
             jumpAction.action.Enable();
         }
         if (characterSwap != null)
@@ -71,8 +71,8 @@ public class PlayerController : MonoBehaviour
 
         if (jumpAction != null)
         {
-            jumpAction.action.performed += OnJumpPressed;
-            jumpAction.action.canceled += OnJumpReleased;
+            jumpAction.action.performed += Jump;
+          //  jumpAction.action.canceled += OnJumpReleased;
             jumpAction.action.Disable();
         }
         if (characterSwap != null)
@@ -114,18 +114,16 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    void OnJumpPressed(InputAction.CallbackContext callbackContext)
+   /* void OnJumpPressed(InputAction.CallbackContext callbackContext) //A way to call jump through a debug!
     {
         Debug.Log("Space Pressed");
-
         Jump();
+    } */
 
-    }
-
-    void OnJumpReleased(InputAction.CallbackContext callbackContext)
+    /* void OnJumpReleased(InputAction.CallbackContext callbackContext) //Same as above but released :)
     {
            Debug.Log("Space Released");
-    }
+    } */ 
 
     private void FixedUpdate()
     {
@@ -133,8 +131,8 @@ public class PlayerController : MonoBehaviour
 
         float stepx = moveInput.x * moveSpeed;
         Vector2 step = new Vector2(stepx, 0);
-       // rb.MovePosition(rb.position + step); //This is left/right movement //THIS IS EVIL
-       //rb.velocity = new Vector2(moveInput.x * moveSpeed, rb.velocity.y);
+       // rb.MovePosition(rb.position + step); //This is left/right movement but deactivates the jump on first frame
+        rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
         RaycastHit2D raycastHit;
         raycastHit = Physics2D.Raycast(transform.position + (Vector3.down * 0.51f), Vector2.down, groundCheckDistance);
         Debug.DrawRay(transform.position, Vector2.down, Color.red, groundCheckDistance); //This makes the laser appear
@@ -151,24 +149,24 @@ public class PlayerController : MonoBehaviour
        
     }
 
-    public void Jump()
-    {
-        // if (Input.GetKeyDown(KeyCode.Space)) 
-        // if (rb == null) return;
-        //  if (!isGrounded) return;
+    public void Jump(InputAction.CallbackContext callbackContext) //All working!
+    { 
+         if (rb == null) return;
+         if (!isGrounded) return;
 
-        Debug.Log("You jumped!"); // WHY DOES ONLY THIS TRIGGER???????
+        Debug.Log("You jumped!");
 
         rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         isGrounded = false;
         state = CurrentState.Jumping;
-        character = CurrentCharacter.CharacterB;
-        
     }
 
     public void UseAbility()
     {
+        if (character == CurrentCharacter.CharacterA && activeAbility == false) //REMEMBER THE DOUBLE EQUALS
+        {
 
+        }
     }
 
     private void HandleState() //Keeping track of the kinds of powers you can use... like if you're jumping you cannot be jumping again until you're grounded
