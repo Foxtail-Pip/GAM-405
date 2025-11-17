@@ -16,7 +16,7 @@ public class PauseMenuManager : MonoBehaviour
 
     private void TogglePauseMenu(bool paused)
     {
-        Time.timeScale = paused ? 0f : 1f;
+        Time.timeScale = paused ? 0f : 1f; //seems to store inputs and change states even when time stopped?
         pauseMenu.SetActive(paused);
     }
 }

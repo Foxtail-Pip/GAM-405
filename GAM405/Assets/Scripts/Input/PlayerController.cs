@@ -12,16 +12,17 @@ public class PlayerController : MonoBehaviour
     public InputActionReference characterSwap;
 
     public float moveSpeed = 5f;
-    public float jumpForce = 500f;
+    public float jumpForce = 5f;
     public Rigidbody2D rb;
     private Vector2 moveInput;
+  //  public Component.gameObject player;
 
     [SerializeField] bool isGrounded = true;
     [SerializeField] private bool activeAbility = false;
     [SerializeField] float groundCheckDistance = 5f;
     private SpriteRenderer characterColor;
 
-    enum CurrentState { NoAbility, AntigravActive, ShrinkActive, Jumping }
+    enum CurrentState { NoAbility, AntigravActive, ShrinkActive }
     [SerializeField] CurrentState state = CurrentState.NoAbility;
 
     enum CurrentCharacter { CharacterA, CharacterB, CharacterC };
@@ -30,6 +31,7 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         characterColor = this.GetComponent <SpriteRenderer> ();
+       // print.(gameObject.name);
     }
     // Update is called once per frame
     void Update()
@@ -147,8 +149,16 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
 
         RaycastHit2D raycastHit;
-        raycastHit = Physics2D.Raycast(transform.position + (Vector3.down * 0.51f), Vector2.down, groundCheckDistance);
-        Debug.DrawRay(transform.position, Vector2.down, Color.red, groundCheckDistance); //This makes the laser appear
+        if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
+        {
+            raycastHit = Physics2D.Raycast(transform.position + (Vector3.up * 0.51f), Vector2.up, groundCheckDistance);
+            Debug.DrawRay(transform.position, Vector2.up, Color.red, groundCheckDistance);
+        } //Fix grounded check for ceiling!
+        else
+        {
+            raycastHit = Physics2D.Raycast(transform.position + (Vector3.down * 0.51f), Vector2.down, groundCheckDistance);
+            Debug.DrawRay(transform.position, Vector2.down, Color.red, groundCheckDistance); //This makes the laser appear
+        }
        if (raycastHit.collider != null && raycastHit.collider.gameObject.layer != 3)
         {
             Debug.Log(raycastHit.collider.gameObject);
@@ -158,7 +168,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             isGrounded = false;
-            state = CurrentState.Jumping; //< if the above comment is deactivated then you stay in jump
+           // state = CurrentState.Jumping; //< if the above comment is deactivated then you stay in jump
         } 
        
     }
@@ -166,12 +176,19 @@ public class PlayerController : MonoBehaviour
     public void Jump(InputAction.CallbackContext callbackContext) //All working!
     { 
          if (rb == null) return;
-         if (!isGrounded) return;
+        // if (!isGrounded) return; < uncomment when ceiling check fixed
 
         Debug.Log("You jumped!");
-
-        rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
-        isGrounded = false;
+        if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
+        {
+            rb.AddForce(Vector2.down * jumpForce, ForceMode2D.Impulse);
+            isGrounded = false;
+        }
+        else
+        {
+            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            isGrounded = false;
+        }
       //  state = CurrentState.Jumping;
     }
 
@@ -206,12 +223,18 @@ public class PlayerController : MonoBehaviour
         {
             case CurrentState.NoAbility:
                 activeAbility = false;
+                rb.transform.localScale = new Vector2(1, 1);
                 break;
             case CurrentState.AntigravActive:
                 activeAbility = true;
+                rb.gravityScale = -1; 
                 break;
             case CurrentState.ShrinkActive:
                 activeAbility = true;
+                // rb.transform.scale (0.5, 0.5, 0.5); //rigidbody doesnt access scale!
+               // GameObject.transform.scale (0.5, 0.5, 0.5);
+               rb.transform.localScale = new Vector2(0.5f, 0.5f);
+                
                 break;
            // case CurrentState.Jumping:
                 
@@ -225,10 +248,10 @@ public class PlayerController : MonoBehaviour
         {
             case CurrentCharacter.CharacterA: //default and jump
                 characterColor.color = Color.indianRed;
-                if (isGrounded)
-                {
+               // if (isGrounded)
+               // {
                     state = CurrentState.NoAbility;
-                }
+               // }
                 break;
             case CurrentCharacter.CharacterB: //shrink
                 characterColor.color = Color.darkOrchid;
