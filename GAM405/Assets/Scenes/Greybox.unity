@@ -1793,7 +1793,6 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1302974256}
-  - {fileID: 1063443777}
   - {fileID: 965059599}
   - {fileID: 610334357}
   m_Father: {fileID: 0}
@@ -2025,7 +2024,7 @@ GameObject:
   - component: {fileID: 1063443779}
   - component: {fileID: 1063443778}
   m_Layer: 0
-  m_Name: Floor (1)
+  m_Name: LevelElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2040,11 +2039,11 @@ Transform:
   m_GameObject: {fileID: 1063443776}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 14.05, y: 1.26, z: 0}
-  m_LocalScale: {x: 24.230091, y: 1, z: 1}
+  m_LocalPosition: {x: 3.5, y: 1, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 925331737}
+  m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!61 &1063443778
 BoxCollider2D:
@@ -2855,3 +2854,4 @@ SceneRoots:
   - {fileID: 150326409}
   - {fileID: 1260853698}
   - {fileID: 1944092974}
+  - {fileID: 1063443777}
