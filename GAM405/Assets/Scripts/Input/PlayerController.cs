@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour
     public float jumpForce = 5f;
     public Rigidbody2D rb;
     private Vector2 moveInput;
+    private bool paused = false;
   //  public Component.gameObject player;
 
     [SerializeField] bool isGrounded = true;
@@ -54,6 +55,8 @@ public class PlayerController : MonoBehaviour
 
     private void OnEnable()
     {
+        EventManager.TogglePause += PausePlayer;
+
         if (moveAction != null) moveAction.action.Enable();
 
         if (jumpAction != null)
@@ -76,6 +79,8 @@ public class PlayerController : MonoBehaviour
     }
     private void OnDisable()
     {
+        EventManager.TogglePause -= PausePlayer;
+
         if (moveAction != null) moveAction.action.Disable();
 
         if (jumpAction != null)
@@ -97,6 +102,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void PausePlayer(bool yes)
+    {
+        paused = yes;
+    }
+
     private void OnSwapPressed(InputAction.CallbackContext callbackContext)
     {
         Cycle();
@@ -111,6 +121,8 @@ public class PlayerController : MonoBehaviour
 
     public void Cycle()
     {
+        if (paused) return;
+
         if (character == CurrentCharacter.CharacterA)  //&& character != CurrentCharacter.CharacterA
         {
             character = CurrentCharacter.CharacterB;
@@ -160,11 +172,11 @@ public class PlayerController : MonoBehaviour
             Debug.DrawRay(transform.position, Vector2.down, Color.red, groundCheckDistance); //This makes the laser appear
         }
        if (raycastHit.collider != null && raycastHit.collider.gameObject.layer != 3)
-        {
+       {
             Debug.Log(raycastHit.collider.gameObject);
             isGrounded = true;
            // state = CurrentState.DefaultMovement; //< This makes it so you can't activate your ability
-        }
+       }
         else
         {
             isGrounded = false;
@@ -176,7 +188,8 @@ public class PlayerController : MonoBehaviour
     public void Jump(InputAction.CallbackContext callbackContext) //All working!
     { 
          if (rb == null) return;
-        // if (!isGrounded) return; < uncomment when ceiling check fixed
+         if (!isGrounded) return; //< uncomment when ceiling check fixed
+         if (paused) return;
 
         Debug.Log("You jumped!");
         if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
@@ -224,6 +237,7 @@ public class PlayerController : MonoBehaviour
             case CurrentState.NoAbility:
                 activeAbility = false;
                 rb.transform.localScale = new Vector2(1, 1);
+                rb.gravityScale = 1;
                 break;
             case CurrentState.AntigravActive:
                 activeAbility = true;
@@ -234,6 +248,7 @@ public class PlayerController : MonoBehaviour
                 // rb.transform.scale (0.5, 0.5, 0.5); //rigidbody doesnt access scale!
                // GameObject.transform.scale (0.5, 0.5, 0.5);
                rb.transform.localScale = new Vector2(0.5f, 0.5f);
+                rb.gravityScale = 1;
                 
                 break;
            // case CurrentState.Jumping:
