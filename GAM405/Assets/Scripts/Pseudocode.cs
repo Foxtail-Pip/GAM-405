@@ -1,10 +1,4 @@
-using System;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.TextCore.Text;
-using UnityEngine.UIElements;
-using static UnityEditor.VersionControl.Asset;
-using static UnityEngine.RuleTile.TilingRuleOutput;
 
 public class Pseudocode : MonoBehaviour
 {

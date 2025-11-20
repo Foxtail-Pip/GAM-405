@@ -13,14 +13,16 @@ public class PlayerController : MonoBehaviour
 
     public float moveSpeed = 5f;
     public float jumpForce = 5f;
-    public Rigidbody2D rb;
+    public Rigidbody rb;
     private Vector2 moveInput;
     private bool paused = false;
-  //  public Component.gameObject player;
+    //  public Component.gameObject player;
+
+    [SerializeField] float rayStartingDistance = 0.49f;
 
     [SerializeField] bool isGrounded = true;
     [SerializeField] private bool activeAbility = false;
-    [SerializeField] float groundCheckDistance = 5f;
+    [SerializeField] float groundCheckDistance = 0.1f;
     private SpriteRenderer characterColor;
 
     enum CurrentState { NoAbility, AntigravActive, ShrinkActive }
@@ -49,8 +51,8 @@ public class PlayerController : MonoBehaviour
 
     private void Awake()
     {
-        rb = GetComponent<Rigidbody2D>();
-        rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+        rb = GetComponent<Rigidbody>();
+        rb.interpolation = RigidbodyInterpolation.Interpolate;
     }
 
     private void OnEnable()
@@ -160,16 +162,16 @@ public class PlayerController : MonoBehaviour
        // rb.MovePosition(rb.position + step); //This is left/right movement but deactivates the jump on first frame
         rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
 
-        RaycastHit2D raycastHit;
+        RaycastHit raycastHit; //why did this stop workingg
         if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
         {
-            raycastHit = Physics2D.Raycast(transform.position + (Vector3.up * 0.51f), Vector2.up, groundCheckDistance);
-            Debug.DrawRay(transform.position, Vector2.up, Color.red, groundCheckDistance);
-        } //Fix grounded check for ceiling!
+            Physics.Raycast(transform.position + (Vector3.up * rayStartingDistance), Vector3.up, out raycastHit, groundCheckDistance);
+            Debug.DrawRay(transform.position + (Vector3.up * rayStartingDistance), (Vector3.up * groundCheckDistance), Color.red, groundCheckDistance);
+        }
         else
         {
-            raycastHit = Physics2D.Raycast(transform.position + (Vector3.down * 0.51f), Vector2.down, groundCheckDistance);
-            Debug.DrawRay(transform.position, Vector2.down, Color.red, groundCheckDistance); //This makes the laser appear
+            Physics.Raycast(transform.position + (Vector3.down * rayStartingDistance), Vector3.down, out raycastHit, groundCheckDistance);
+            Debug.DrawRay(transform.position + (Vector3.down * rayStartingDistance), (Vector3.down * groundCheckDistance), Color.red, groundCheckDistance); //This makes the laser appear
         }
        if (raycastHit.collider != null && raycastHit.collider.gameObject.layer != 3)
        {
@@ -194,12 +196,12 @@ public class PlayerController : MonoBehaviour
         Debug.Log("You jumped!");
         if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
         {
-            rb.AddForce(Vector2.down * jumpForce, ForceMode2D.Impulse);
+            rb.AddForce(Vector2.down * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
         else
         {
-            rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+            rb.AddForce(Vector2.up * jumpForce, ForceMode.Impulse);
             isGrounded = false;
         }
       //  state = CurrentState.Jumping;
@@ -237,19 +239,19 @@ public class PlayerController : MonoBehaviour
             case CurrentState.NoAbility:
                 activeAbility = false;
                 rb.transform.localScale = new Vector2(1, 1);
-                rb.gravityScale = 1;
+                Physics.gravity = new Vector3(0, -9.81f, 0);
                 break;
             case CurrentState.AntigravActive:
                 activeAbility = true;
-                rb.gravityScale = -1; 
+                Physics.gravity = new Vector3(0, 9.81f, 0);
                 break;
             case CurrentState.ShrinkActive:
                 activeAbility = true;
                 // rb.transform.scale (0.5, 0.5, 0.5); //rigidbody doesnt access scale!
                // GameObject.transform.scale (0.5, 0.5, 0.5);
                rb.transform.localScale = new Vector2(0.5f, 0.5f);
-                rb.gravityScale = 1;
-                
+                Physics.gravity = new Vector3(0, -9.81f, 0);
+
                 break;
            // case CurrentState.Jumping:
                 
