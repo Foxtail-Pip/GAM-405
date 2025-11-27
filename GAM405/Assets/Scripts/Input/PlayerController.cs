@@ -163,13 +163,22 @@ public class PlayerController : MonoBehaviour
         rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
 
         RaycastHit raycastHit; //why did this stop workingg
-        if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
+        //You can do this for walls as well with a blocked check! linearVelocity.x with a low raycast check so the corners don't slide up things
+        if (character == CurrentCharacter.CharacterB && state == CurrentState.AntigravActive)
         {
+            rayStartingDistance = 0.49f;
             Physics.Raycast(transform.position + (Vector3.up * rayStartingDistance), Vector3.up, out raycastHit, groundCheckDistance);
             Debug.DrawRay(transform.position + (Vector3.up * rayStartingDistance), (Vector3.up * groundCheckDistance), Color.red, groundCheckDistance);
         }
+        else if (character == CurrentCharacter.CharacterC && state == CurrentState.ShrinkActive)
+        {
+            rayStartingDistance = 0.24f;
+            Physics.Raycast(transform.position + (Vector3.down * rayStartingDistance), Vector3.down, out raycastHit, groundCheckDistance);
+            Debug.DrawRay(transform.position + (Vector3.down * rayStartingDistance), (Vector3.down * groundCheckDistance), Color.red, groundCheckDistance);
+        }
         else
         {
+            rayStartingDistance = 0.49f;
             Physics.Raycast(transform.position + (Vector3.down * rayStartingDistance), Vector3.down, out raycastHit, groundCheckDistance);
             Debug.DrawRay(transform.position + (Vector3.down * rayStartingDistance), (Vector3.down * groundCheckDistance), Color.red, groundCheckDistance); //This makes the laser appear
         }
@@ -188,13 +197,15 @@ public class PlayerController : MonoBehaviour
     }
 
     public void Jump(InputAction.CallbackContext callbackContext) //All working!
-    { 
+    {
+        Debug.Log("Attempting Jump");
          if (rb == null) return;
          if (!isGrounded) return; //< uncomment when ceiling check fixed
+        if (rb.linearVelocity.y > 0f) return;
          if (paused) return;
 
         Debug.Log("You jumped!");
-        if (character == CurrentCharacter.CharacterC && state == CurrentState.AntigravActive)
+        if (character == CurrentCharacter.CharacterB && state == CurrentState.AntigravActive)
         {
             rb.AddForce(Vector2.down * jumpForce, ForceMode.Impulse);
             isGrounded = false;
@@ -212,19 +223,19 @@ public class PlayerController : MonoBehaviour
         // add grounded check here? So if you click ability you stay in it?? EG. && isGrounded == true
         
        // if (character == CurrentCharacter.CharacterA && isGrounded == true) { state = CurrentState.DefaultMovement; }
-        if (character == CurrentCharacter.CharacterB && activeAbility == false) //REMEMBER THE DOUBLE EQUALS
+        if (character == CurrentCharacter.CharacterC && activeAbility == false) //REMEMBER THE DOUBLE EQUALS
         {
             state = CurrentState.ShrinkActive;
         }
-        else if (character == CurrentCharacter.CharacterB && activeAbility == true)
+        else if (character == CurrentCharacter.CharacterC && activeAbility == true)
         {
             state = CurrentState.NoAbility;
         }
-        else if (character == CurrentCharacter.CharacterC && activeAbility == false)
+        else if (character == CurrentCharacter.CharacterB && activeAbility == false)
         {
             state = CurrentState.AntigravActive;
         }
-        else if (character == CurrentCharacter.CharacterC && activeAbility == true)
+        else if (character == CurrentCharacter.CharacterB && activeAbility == true)
         {
             state = CurrentState.NoAbility;
         }
@@ -270,10 +281,10 @@ public class PlayerController : MonoBehaviour
                     state = CurrentState.NoAbility;
                // }
                 break;
-            case CurrentCharacter.CharacterB: //shrink
+            case CurrentCharacter.CharacterB: //antigrav
                 characterColor.color = Color.darkOrchid;
                 break;
-            case CurrentCharacter.CharacterC: //antigrav
+            case CurrentCharacter.CharacterC: //shrink
                 characterColor.color = Color.royalBlue;
                 break;
         }
