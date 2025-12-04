@@ -128,16 +128,19 @@ public class PlayerController : MonoBehaviour
         if (character == CurrentCharacter.CharacterA)  //&& character != CurrentCharacter.CharacterA
         {
             character = CurrentCharacter.CharacterB;
+            state = CurrentState.NoAbility;
             Debug.Log("B");
         }
         else if (character == CurrentCharacter.CharacterB)
         {
             character = CurrentCharacter.CharacterC;
+            state = CurrentState.NoAbility;
             Debug.Log("C");
         }
         else if (character == CurrentCharacter.CharacterC)
         {
             character = CurrentCharacter.CharacterA;
+            state = CurrentState.NoAbility;
             Debug.Log("A");
         }
     }
@@ -283,9 +286,11 @@ public class PlayerController : MonoBehaviour
                 break;
             case CurrentCharacter.CharacterB: //antigrav
                 characterColor.color = Color.darkOrchid;
+                
                 break;
             case CurrentCharacter.CharacterC: //shrink
                 characterColor.color = Color.royalBlue;
+                
                 break;
         }
     }
