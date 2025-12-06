@@ -166,7 +166,7 @@ public class PlayerController : MonoBehaviour
        // rb.MovePosition(rb.position + step); //This is left/right movement but deactivates the jump on first frame
         rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
 
-        RaycastHit raycastHit; //why did this stop workingg
+        RaycastHit raycastHit;
         //You can do this for walls as well with a blocked check! linearVelocity.x with a low raycast check so the corners don't slide up things
         if (character == CurrentCharacter.CharacterB && state == CurrentState.AntigravActive)
         {
@@ -190,12 +190,10 @@ public class PlayerController : MonoBehaviour
        {
             Debug.Log(raycastHit.collider.gameObject);
             isGrounded = true;
-           // state = CurrentState.DefaultMovement; //< This makes it so you can't activate your ability
        }
         else
         {
             isGrounded = false;
-           // state = CurrentState.Jumping; //< if the above comment is deactivated then you stay in jump
         } 
        
     }
@@ -224,9 +222,6 @@ public class PlayerController : MonoBehaviour
 
     public void UseAbility(InputAction.CallbackContext callbackContext)
     {
-        // add grounded check here? So if you click ability you stay in it?? EG. && isGrounded == true
-        
-       // if (character == CurrentCharacter.CharacterA && isGrounded == true) { state = CurrentState.DefaultMovement; }
         if (character == CurrentCharacter.CharacterC && activeAbility == false) //REMEMBER THE DOUBLE EQUALS
         {
             state = CurrentState.ShrinkActive;
@@ -245,7 +240,7 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    private void HandleState() //Keeping track of the kinds of powers you can use... like if you're jumping you cannot be jumping again until you're grounded
+    private void HandleState() //Keeping track of the kinds of powers you can use
         // used with abilityactive bool to make sure you can't do overlap stuff
         // cases are MAINLY just to put things in nice sections so its not all messy
     {
@@ -266,11 +261,7 @@ public class PlayerController : MonoBehaviour
                // GameObject.transform.scale (0.5, 0.5, 0.5);
                rb.transform.localScale = new Vector2(0.5f, 0.5f);
                 Physics.gravity = new Vector3(0, -9.81f, 0);
-
                 break;
-           // case CurrentState.Jumping:
-                
-                //break;
         }
     }
 
