@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class PauseManager : MonoBehaviour
 {
@@ -35,4 +36,12 @@ public class PauseManager : MonoBehaviour
         Application.Quit();
         Debug.Log("Game Quitted...");
     }
+
+    public void RestartLevel()
+    {
+        SceneManager.LoadScene("Greybox");
+        Debug.Log("AttemptingLoad");
+        Time.timeScale = 1.0f;
+    }
 }
+

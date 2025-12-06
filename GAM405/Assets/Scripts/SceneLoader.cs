@@ -14,5 +14,6 @@ public class SceneLoader : MonoBehaviour
     {
         SceneManager.LoadScene("Greybox");
         Debug.Log("AttemptingLoad");
+
     }
 }
